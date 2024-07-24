@@ -32,14 +32,13 @@ app.get("/api/notes", (req, res) => {
 });
 
 app.get("/api/notes/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const note = notes.find((note) => note.id === id);
-
-  if (!note) {
-    return res.status(404).json({ error: "note not found" });
-  }
-
-  res.json(note);
+  Note.findById(req.params.id)
+    .then((note) => {
+      res.json(note);
+    })
+    .catch(() => {
+      res.status(404).json({ error: "note not found" });
+    });
 });
 
 app.delete("/api/notes/:id", (req, res) => {
@@ -61,14 +60,14 @@ app.post("/api/notes", (req, res) => {
     return res.status(400).json({ error: "content missing" });
   }
 
-  const note = {
-    id: generateId(notes),
+  const note = new Note({
     content: body.content,
     important: body.important || false,
-  };
+  });
 
-  notes = notes.concat(note);
-  res.json(note);
+  note.save().then((noteSaved) => {
+    res.json(noteSaved);
+  });
 });
 
 app.use(unknownEndpoint);
