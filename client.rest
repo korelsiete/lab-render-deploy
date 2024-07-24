@@ -1,7 +1,10 @@
 GET http://localhost:3001/api/notes
 
 ###
-GET http://localhost:3001/api/notes/669ece0e5191b28daae7cc03
+GET http://localhost:3001/api/notes/669ece0e5191b28daa37cc03
+
+###
+DELETE http://localhost:3001/api/notes/66a13258e2d224cd5746a4bd
 
 ###
 POST http://localhost:3001/api/notes
@@ -9,4 +12,13 @@ Content-Type: application/json
 
 {
   "content": "Nextjs router"
+}
+
+###
+PUT http://localhost:3001/api/notes/669ece0e5191b28daae7cc03
+Content-Type: application/json
+
+{
+  "content": "Html is easy",
+  "important": false
 }

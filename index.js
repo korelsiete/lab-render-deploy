@@ -8,22 +8,28 @@ const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: "unknown endpoint" });
 };
 
-const requestLogger = (req, res, next) => {
-  console.log(`${req.method} | "${req.path}"`);
-  console.log(req.body);
-  console.log("----");
+const logger = (req, res, next) => {
+  console.log("------------------------------------");
+  console.log(`Method: ${req.method}`);
+  console.log(`Path: "${req.path}"`);
+  console.log(`Body: ${JSON.stringify(req.body)}`);
   next();
 };
 
-function generateId(notes = []) {
-  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
-  return maxId + 1;
-}
+const errorHandler = (error, req, res, next) => {
+  console.error("Error: ===> " + error.message);
+
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
 
 app.use(cors());
 app.use(express.static("dist"));
 app.use(express.json());
-app.use(requestLogger);
+app.use(logger);
 
 app.get("/api/notes", (req, res) => {
   Note.find({}).then((notes) => {
@@ -31,26 +37,28 @@ app.get("/api/notes", (req, res) => {
   });
 });
 
-app.get("/api/notes/:id", (req, res) => {
+app.get("/api/notes/:id", (req, res, next) => {
   Note.findById(req.params.id)
     .then((note) => {
-      res.json(note);
+      if (note) {
+        res.json(note);
+      } else {
+        res.status(404).json({ error: "note not found" });
+      }
     })
-    .catch(() => {
-      res.status(404).json({ error: "note not found" });
-    });
+    .catch((err) => next(err));
 });
 
 app.delete("/api/notes/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const note = notes.find((note) => note.id === id);
-
-  if (!note) {
-    return res.status(404).json({ error: "note not found" });
-  }
-
-  notes = notes.filter((note) => note.id !== id);
-  res.status(204).end();
+  Note.findByIdAndDelete(req.params.id)
+    .then((noteDeleted) => {
+      if (noteDeleted) {
+        res.status(204).end();
+      } else {
+        res.status(404).json({ error: "note not found" });
+      }
+    })
+    .catch((err) => next(err));
 });
 
 app.post("/api/notes", (req, res) => {
@@ -70,7 +78,18 @@ app.post("/api/notes", (req, res) => {
   });
 });
 
+app.put("/api/notes/:id", (req, res) => {
+  const note = req.body;
+
+  Note.findByIdAndUpdate(req.params.id, note, { new: true })
+    .then((updatedNote) => {
+      res.json(updatedNote);
+    })
+    .catch((err) => next(err));
+});
+
 app.use(unknownEndpoint);
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
