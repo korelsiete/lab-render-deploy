@@ -11,7 +11,7 @@ POST http://localhost:3001/api/notes
 Content-Type: application/json
 
 {
-  "content": "Nextjs router"
+  "content": "holas"
 }
 
 ###
@@ -19,6 +19,6 @@ PUT http://localhost:3001/api/notes/669ece0e5191b28daae7cc03
 Content-Type: application/json
 
 {
-  "content": "Html is easy",
+  "content": "nue",
   "important": false
 }

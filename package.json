@@ -7,11 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
     "build:ui": "rm -rf dist && cd ../frontend && npm run build && cp -r dist ../backend",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
+    "lint": "eslint . --fix"
   },
   "author": "korels7 <pajita200305@gmail.com>",
   "license": "MIT",
-  "description": "",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -19,6 +19,14 @@
     "mongoose": "^8.5.1"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^2.6.1",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "globals": "^15.9.0",
     "nodemon": "^3.1.4"
   }
 }

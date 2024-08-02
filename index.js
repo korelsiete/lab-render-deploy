@@ -23,6 +23,10 @@ const errorHandler = (error, req, res, next) => {
     return res.status(400).send({ error: "malformatted id" });
   }
 
+  if (error.name === "ValidationError") {
+    return res.status(400).json({ error: error.message });
+  }
+
   next(error);
 };
 
@@ -61,30 +65,29 @@ app.delete("/api/notes/:id", (req, res) => {
     .catch((err) => next(err));
 });
 
-app.post("/api/notes", (req, res) => {
+app.post("/api/notes", (req, res, next) => {
   const body = req.body;
-
-  if (!body.content) {
-    return res.status(400).json({ error: "content missing" });
-  }
 
   const note = new Note({
     content: body.content,
     important: body.important || false,
   });
 
-  note.save().then((noteSaved) => {
-    res.json(noteSaved);
-  });
+  note
+    .save()
+    .then((noteSaved) => res.json(noteSaved))
+    .catch((err) => next(err));
 });
 
-app.put("/api/notes/:id", (req, res) => {
+app.put("/api/notes/:id", (req, res, next) => {
   const note = req.body;
 
-  Note.findByIdAndUpdate(req.params.id, note, { new: true })
-    .then((updatedNote) => {
-      res.json(updatedNote);
-    })
+  Note.findByIdAndUpdate(req.params.id, note, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  })
+    .then((updatedNote) => res.json(updatedNote))
     .catch((err) => next(err));
 });
 
